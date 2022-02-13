@@ -2,3 +2,6 @@ mat-form-field,
 text-area {
   width: 100%;
 }
+mat-spinner {
+  margin: auto;
+}

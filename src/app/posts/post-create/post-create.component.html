@@ -1,4 +1,4 @@
-<h1>Create new Post!</h1>
+<!-- <h1>Create new Post!</h1> -->
 <!-- <textarea row="6" [value]="newPost" #postInput></textarea>
 <hr>
 <button (click)="onAddPost(postInput)">Save Post</button>
@@ -13,13 +13,14 @@
   </mat-form-field>
   <button mat-raised-button color="accent" (click)="onAddPost()">Save Post</button>
 </mat-card> -->
-<mat-card>
-  <form (submit)="onAddPost(form)" #form="ngForm">
+<mat-card >
+  <mat-spinner *ngIf="isLoading"></mat-spinner>
+  <form (submit)="onSavePost(form)" #form="ngForm" *ngIf="!isLoading">
     <mat-form-field matInput ngDefaultControl>
       <input
         matInput
         type="text"
-        ngModel
+        [ngModel]="post?.title"
         name="title"
         placeholder="Post Title"
         #title="ngModel"
@@ -31,7 +32,7 @@
       <textarea
         matInput
         rows="6"
-        ngModel
+        [ngModel]="post?.content"
         name="content"
         placeholder="Post Content"
         #content="ngModel"

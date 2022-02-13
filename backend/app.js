@@ -1,8 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const Post = require("./models/post");
 const mongoose = require("mongoose");
-
+const routes = require('./routes/posts')
 const app = express();
 
 mongoose
@@ -17,7 +16,7 @@ mongoose
   });
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded());
+app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -33,35 +32,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.post("/api/posts", (req, res, next) => {
-  const post = new Post({
-    title: req.body.title,
-    content: req.body.content,
-  });
-  post.save().then((createdPost) => {
-    res
-      .status(201)
-      .json({ message: "Post created successfully!", postId: createdPost._id });
-  });
-});
-
-app.use("/api/posts", (req, res, next) => {
-  Post.find().then((documents) => {
-    res
-      .status(200)
-      .json({ message: "Request processed successfully", posts: documents });
-  });
-});
-
-app.delete("/api/posts/:id", (req, res, next) => {
-  console.log(req.params.id);
-  Post.deleteOne({ _id: req.params.id })
-    .then((result) => {
-      res.status(201).json({ message: "Post Deleted!" });
-    })
-    .catch(() => {
-      console.log("An error occurred while delete!");
-    });
-});
+app.use('/api/posts',routes)
 
 module.exports = app;
+
