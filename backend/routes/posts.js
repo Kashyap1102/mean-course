@@ -2,6 +2,7 @@ const Post = require("../models/post");
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
+const authentication = require("../middleware/authentication");
 
 const MIME_TYPE_MAP = {
   "image/jpeg": "jpg",
@@ -27,6 +28,7 @@ const storage = multer.diskStorage({
 
 router.post(
   "",
+  authentication,
   multer({ storage: storage }).single("image"),
   (req, res, next) => {
     url = req.protocol + "://" + req.get("host");
@@ -36,23 +38,34 @@ router.post(
       imagePath: url + "/images/" + req.file.filename,
     });
     post.save().then((createdPost) => {
-      res
-        .status(201)
-        .json({
-          message: "Post created successfully!",
-          post: { ...createdPost, id: createdPost._id },
-        });
+      res.status(201).json({
+        message: "Post created successfully!",
+        post: { ...createdPost, id: createdPost._id },
+      });
     });
   }
 );
 
 router.get("", (req, res, next) => {
-  console.log("get executed!");
-  Post.find().then((documents) => {
-    res
-      .status(200)
-      .json({ message: "Request processed successfully", posts: documents });
-  });
+  const pageSize = +req.query.pageSize;
+  const currentPage = +req.query.currentPage;
+  const postQuery = Post.find();
+  let fetchedPosts;
+  if (pageSize && currentPage) {
+    postQuery.skip(pageSize * (currentPage - 1)).limit(pageSize);
+  }
+  postQuery
+    .then((documents) => {
+      fetchedPosts = documents;
+      return Post.count();
+    })
+    .then((count) => {
+      res.status(200).json({
+        message: "Request processed successfully",
+        posts: fetchedPosts,
+        maxPosts: count,
+      });
+    });
 });
 
 router.get("/:id", (req, res, next) => {
@@ -65,15 +78,16 @@ router.get("/:id", (req, res, next) => {
   });
 });
 
-router.delete("/:id", (req, res, next) => {
-  Post.deleteOne({ _id: req.params.id }).then((result) => {
-    console.log(result);
-    res.status(200).json({ message: "Post deleted!" });
+authentication,
+  router.delete("/:id", authentication, (req, res, next) => {
+    Post.deleteOne({ _id: req.params.id }).then((result) => {
+      res.status(200).json({ message: "Post deleted!" });
+    });
   });
-});
 
 router.put(
   "/:id",
+  authentication,
   multer({ storage: storage }).single("imagePath"),
   (req, res, next) => {
     let imagePath = req.body.imagePath;
@@ -87,7 +101,6 @@ router.put(
     post.content = req.body.content;
     post.imagePath = imagePath;
 
-    console.log(imagePath);
 
     Post.updateOne(post).then((result) => {
       res.status(200).json({ message: "Post updated!" });
