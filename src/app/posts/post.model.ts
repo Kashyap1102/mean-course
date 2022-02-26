@@ -1,5 +1,6 @@
 export interface PostData {
-  id?: string;
+  id?: string|Blob|null;
   title?: string;
   content?: string;
+  imagePath?:string
 }

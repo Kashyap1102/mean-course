@@ -5,6 +5,9 @@
       {{ post.title }}
     </mat-expansion-panel-header>
     <p>{{ post.content }}</p>
+    <div class="post-image">
+      <img [src]="post.imagePath" [alt]="post.title" />
+    </div>
     <mat-action-row>
       <a mat-button color="primary" [routerLink]="['/edit', post.id]">EDIT</a>
       <button mat-button color="warn" (click)="onDeletePost(post.id)">
@@ -13,4 +16,6 @@
     </mat-action-row>
   </mat-expansion-panel>
 </mat-accordion>
-<p class="info-text mat-body-1" *ngIf="posts.length == 0 && !isLoading">No Posts yet!</p>
+<p class="info-text mat-body-1" *ngIf="posts.length == 0 && !isLoading">
+  No Posts yet!
+</p>

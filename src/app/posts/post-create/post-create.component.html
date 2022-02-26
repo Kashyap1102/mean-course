@@ -13,7 +13,7 @@
   </mat-form-field>
   <button mat-raised-button color="accent" (click)="onAddPost()">Save Post</button>
 </mat-card> -->
-<mat-card >
+<!-- <mat-card >
   <mat-spinner *ngIf="isLoading"></mat-spinner>
   <form (submit)="onSavePost(form)" #form="ngForm" *ngIf="!isLoading">
     <mat-form-field matInput ngDefaultControl>
@@ -39,6 +39,50 @@
         required
       ></textarea>
       <mat-error *ngIf="content.invalid">Please enter valid content.</mat-error>
+    </mat-form-field>
+    <button mat-raised-button color="accent" type="submit">Save Post</button>
+  </form>
+</mat-card> -->
+<mat-card>
+  <mat-spinner *ngIf="isLoading"></mat-spinner>
+  <form [formGroup]="form!" (submit)="onSavePost()" *ngIf="!isLoading">
+    <mat-form-field matInput ngDefaultControl>
+      <input
+        matInput
+        type="text"
+        formControlName="title"
+        placeholder="Post Title"
+        required
+      />
+      <mat-error *ngIf="form?.get('title')?.invalid"
+        >Please enter valid title.</mat-error
+      >
+    </mat-form-field>
+    <div>
+      <button type="button" mat-stroked-button (click)="filePicker.click()">
+        Pick Image
+      </button>
+    </div>
+    <div
+      class="image-preview"
+      *ngIf="
+        imagePreview != null && imagePreview != '' && form?.get('image')?.valid
+      "
+    >
+      <img [src]="imagePreview" [alt]="formTitle" />
+    </div>
+    <input type="file" #filePicker (change)="onImagePicked($event)" />
+    <mat-form-field>
+      <textarea
+        matInput
+        rows="6"
+        formControlName="content"
+        placeholder="Post Content"
+        required
+      ></textarea>
+      <mat-error *ngIf="form?.get('content')?.invalid"
+        >Please enter valid content.</mat-error
+      >
     </mat-form-field>
     <button mat-raised-button color="accent" type="submit">Save Post</button>
   </form>
