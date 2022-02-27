@@ -1,6 +1,8 @@
-import { Component, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, NgForm, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { AuthService } from 'src/app/auth/auth.service';
 import { PostData } from '../post.model';
 import { PostsService } from '../posts.service';
 import { mimeType } from './mime-type.validator';
@@ -116,7 +118,7 @@ import { mimeType } from './mime-type.validator';
   templateUrl: './post-create.component.html',
   styleUrls: ['./post-create.component.css'],
 })
-export class PostCreateComponent implements OnInit {
+export class PostCreateComponent implements OnInit, OnDestroy {
   post: PostData | null = null;
   isLoading = false;
   form: FormGroup | null = null;
@@ -124,13 +126,24 @@ export class PostCreateComponent implements OnInit {
   private mode: string | null = 'create';
   imagePreview: string | ArrayBuffer | null = null;
   formTitle: string | null = null;
+  authStatusSubs: Subscription | null = null;
+
 
   constructor(
     public postsService: PostsService,
-    public route: ActivatedRoute
-  ) {}
+    public route: ActivatedRoute,
+    private autheService: AuthService
+  ) { }
+
+
+  ngOnDestroy(): void {
+    this.authStatusSubs?.unsubscribe();
+  }
 
   ngOnInit(): void {
+    this.authStatusSubs = this.autheService.getAutheticationStatusListener().subscribe(status => {
+      this.isLoading = status;
+    });
     this.form = new FormGroup({
       title: new FormControl(null, {
         validators: [Validators.required, Validators.minLength(3)],
@@ -152,9 +165,9 @@ export class PostCreateComponent implements OnInit {
             id: postData._id,
             title: postData.title,
             content: postData.content,
-            imagePath:postData.imagePath
+            imagePath: postData.imagePath
           };
-           this.form?.setValue({
+          this.form?.setValue({
             title: this.post.title,
             content: this.post.content,
             image: this.post.imagePath,

@@ -9,7 +9,7 @@ export class AuthService {
 
 
     private token: string | null = null;
-    public getAuthenticatedStatus = new Subject<boolean>();
+    private getAuthenticatedStatus = new Subject<boolean>();
     isAuthenticated: boolean = false;
     tokenTimer: any;
     userId: string | null = null;
@@ -37,6 +37,10 @@ export class AuthService {
             email: email, password: password
         };
         this.client.post('http://localhost:3000/api/user/signup/', authData).subscribe(response => {
+            this.router.navigate(['/']);
+        }, error => {
+            console.log(error);
+            this.getAuthenticatedStatus.next(false);
         })
     }
 
@@ -59,7 +63,7 @@ export class AuthService {
                     this.saveAuthData(token, expirationDate, this.userId);
                     this.router.navigate(['/'])
                 }
-            })
+            }, error => { this.getAuthenticatedStatus.next(false); })
     }
 
     autoAuthUser() {
