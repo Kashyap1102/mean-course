@@ -36,8 +36,11 @@ router.post(
       title: req.body.title,
       content: req.body.content,
       imagePath: url + "/images/" + req.file.filename,
+      creator: req.userData.userId,
     });
+    console.log(req.userData);
     post.save().then((createdPost) => {
+      console.log(createdPost);
       res.status(201).json({
         message: "Post created successfully!",
         post: { ...createdPost, id: createdPost._id },
@@ -60,6 +63,8 @@ router.get("", (req, res, next) => {
       return Post.count();
     })
     .then((count) => {
+      console.log(fetchedPosts);
+
       res.status(200).json({
         message: "Request processed successfully",
         posts: fetchedPosts,
@@ -78,12 +83,18 @@ router.get("/:id", (req, res, next) => {
   });
 });
 
-authentication,
-  router.delete("/:id", authentication, (req, res, next) => {
-    Post.deleteOne({ _id: req.params.id }).then((result) => {
-      res.status(200).json({ message: "Post deleted!" });
-    });
-  });
+router.delete("/:id", authentication, (req, res, next) => {
+  Post.deleteOne({ _id: req.params.id, creator: req.userData.userId }).then(
+    (result) => {
+      console.log(result);
+      if (result.deletedCount > 0) {
+        res.status(200).json({ message: "Post Deleted!" });
+      } else {
+        res.status(401).json({ message: "Authorization Failed!!" });
+      }
+    }
+  );
+});
 
 router.put(
   "/:id",
@@ -101,9 +112,16 @@ router.put(
     post.content = req.body.content;
     post.imagePath = imagePath;
 
-
-    Post.updateOne(post).then((result) => {
-      res.status(200).json({ message: "Post updated!" });
+    Post.updateOne(
+      { _id: req.params.id, creator: req.userData.userId },
+      post
+    ).then((result) => {
+      console.log(result);
+      if (result.modifiedCount > 0) {
+        res.status(200).json({ message: "Post updated!" });
+      } else {
+        res.status(401).json({ message: "Authorization Failed!!" });
+      }
     });
   }
 );

@@ -4,7 +4,6 @@ import { Observable, Subject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs';
 import { Router } from '@angular/router';
-import { identifierName } from '@angular/compiler';
 
 @Injectable({ providedIn: 'root' })
 export class PostsService {
@@ -23,6 +22,7 @@ export class PostsService {
           content: string;
           _id: string;
           imagePath: string;
+          creator: string;
         }[],
         maxPosts: number
       }>('http://localhost:3000/api/posts' + queryParams)
@@ -35,13 +35,15 @@ export class PostsService {
                 content: string;
                 _id: string;
                 imagePath: string;
+                creator: string;
               }) => {
-                return {
+                return ({
                   title: post.title,
                   content: post.content,
                   id: post._id,
                   imagePath: post.imagePath,
-                };
+                  creator: post.creator
+                });
               }
             ), maxPosts: postData.maxPosts
           }
@@ -49,6 +51,7 @@ export class PostsService {
       )
       .subscribe((transformedPosts) => {
         this.posts = transformedPosts.posts;
+        console.log(transformedPosts.posts)
         this.postsUpdated.next({ posts: [...this.posts], postCount: transformedPosts.maxPosts });
       });
   }
@@ -98,6 +101,7 @@ export class PostsService {
         title: title,
         content: content,
         imagePath: image,
+        creator: null
       };
     }
     this.httpClient
@@ -117,12 +121,14 @@ export class PostsService {
     title: string;
     content: string;
     imagePath: string;
+    creator: string;
   }> {
     return this.httpClient.get<{
       _id: string,
       title: string,
       content: string,
-      imagePath: string
+      imagePath: string,
+      creator: string
     }>('http://localhost:3000/api/posts/' + postId);
   }
 }

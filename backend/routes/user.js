@@ -53,7 +53,9 @@ router.post("/login", (req, res, next) => {
           expiresIn: "1h",
         }
       );
-      return res.status(201).json({ token: jwt, expiresIn: 3600 });
+      return res
+        .status(201)
+        .json({ token: jwt, expiresIn: 3600, userId: fetchedUser._id });
     })
     .catch((err) => {
       return res.status(401).json({
