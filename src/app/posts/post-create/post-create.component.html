@@ -71,7 +71,7 @@
     >
       <img [src]="imagePreview" [alt]="formTitle" />
     </div>
-    <input type="file" #filePicker (change)="onImagePicked($event)" />
+    <input type="file" #filePicker name="image" (change)="onImagePicked($event)" />
     <mat-form-field>
       <textarea
         matInput

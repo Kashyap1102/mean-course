@@ -4,12 +4,14 @@ import { Observable, Subject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs';
 import { Router } from '@angular/router';
+import { environment } from 'src/environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class PostsService {
   private posts: PostData[] = [];
   private postsUpdated = new Subject<{ posts: PostData[], postCount: number }>();
 
+  private BACKEND_URL = environment.apiUrl + "posts/";
   constructor(private httpClient: HttpClient, private router: Router) { }
 
   getPosts(postsPerPage: number, currentPage: number): void {
@@ -25,7 +27,7 @@ export class PostsService {
           creator: string;
         }[],
         maxPosts: number
-      }>('http://localhost:3000/api/posts' + queryParams)
+      }>(this.BACKEND_URL + queryParams)
       .pipe(
         map((postData) => {
           return {
@@ -51,7 +53,6 @@ export class PostsService {
       )
       .subscribe((transformedPosts) => {
         this.posts = transformedPosts.posts;
-        console.log(transformedPosts.posts)
         this.postsUpdated.next({ posts: [...this.posts], postCount: transformedPosts.maxPosts });
       });
   }
@@ -68,7 +69,7 @@ export class PostsService {
 
     this.httpClient
       .post<{ message: string; post: PostData }>(
-        'http://localhost:3000/api/posts',
+        this.BACKEND_URL,
         postData
       )
       .subscribe((response) => {
@@ -92,7 +93,7 @@ export class PostsService {
       postData.append('id', postId as string);
       postData.append('title', title);
       postData.append('content', content);
-      postData.append('imagePath', image, title);
+      postData.append('image', image, title);
     } else {
 
 
@@ -105,7 +106,7 @@ export class PostsService {
       };
     }
     this.httpClient
-      .put('http://localhost:3000/api/posts/' + postId, postData)
+      .put(this.BACKEND_URL + postId, postData)
       .subscribe((response) => {
         this.router.navigate(['/']);
       });
@@ -113,7 +114,7 @@ export class PostsService {
 
   deletePost(postId: string | null | undefined | Blob) {
     return this.httpClient
-      .delete('http://localhost:3000/api/posts/' + postId);
+      .delete(this.BACKEND_URL + postId);
   }
 
   getPost(postId: string | null): Observable<{
@@ -129,6 +130,6 @@ export class PostsService {
       content: string,
       imagePath: string,
       creator: string
-    }>('http://localhost:3000/api/posts/' + postId);
+    }>(this.BACKEND_URL + postId);
   }
 }
